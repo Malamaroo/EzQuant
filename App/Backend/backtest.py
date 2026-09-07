@@ -17,7 +17,7 @@ def player_portfolio_backtest(returns):
     start_date, end_date = collect_dates()
     years = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days / 365.25)
     returns = returns
-    total_return, final_portfolio_value, Portfolio_SharpeRatio = backtest_static(start_date, end_date, returns, initial_capital=1000000)
+    total_return, final_portfolio_value, sharpe = backtest_static(start_date, end_date, returns, initial_capital=1000000)
     return total_return, final_portfolio_value, Portfolio_SharpeRatio, years
 
 
@@ -56,7 +56,6 @@ def wrong_order_dates(start_date, end_date):
         print("Invalid response. Please type 'start' or 'end'.")
         return wrong_order_dates(start_date, end_date)
     return start_date, end_date
-
 
 
 def backtest_static(start_date, end_date,  returns, initial_capital=0):
@@ -104,26 +103,23 @@ def backtest_static(start_date, end_date,  returns, initial_capital=0):
 
     Consideration to ponder: Because there is a safe return of 0, all portfolios are practically measuring how strong their volatility is (in both upwards and negative direction) 
     """
-    SD = stat.pstdev(return_list)
-    Ex = sum(return_list) / len(return_list)
     final_portfolio_value = current_portfolio_value
     total_portfolio_returns = pd.DataFrame({'Week': returns_change['Date'], 'Weekly_Return': return_list})
     total_portfolio_returns.to_csv(f'EzQuant/Data/Processed/backtest_total_returns.csv', index=False)
     total_return = (final_portfolio_value - initial_capital)/initial_capital
 
-    Portfolio_SharpeRatio = calculate_sharpe_ratio(SD,Ex)
 
 
 
-    return total_return, final_portfolio_value, Portfolio_SharpeRatio
+    return total_return, final_portfolio_value, return_list
 
 def backtest_strategy_flexible(data, strategy_func, initial_capital=10000):
     return
 
-
-def calculate_sharpe_ratio(SD, Ex):
-    SharpeRatio = (Ex)/(SD)
-    return SharpeRatio
+def calculate_SD_and_Ex(return_list):
+    SD = stat.pstdev(return_list)
+    Ex = sum(return_list) / len(return_list)
+    return SD, Ex
 
 main()
 

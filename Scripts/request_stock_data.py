@@ -58,16 +58,16 @@ def get_stock_data(price_df):
 
         stock_i_ep = pd.merge_asof(stock_i_p, stock_i_e, on='Date', direction='backward')  # Merge earnings dates with closing prices
         
-        stock_i_ep.to_csv(f'EzQuant/Data/Raw/{ticker}_data.csv', index=False)  # Save the merged data to a CSV file
+        stock_i_ep.to_csv(f'Data/Raw/{ticker}_data.csv', index=False)  # Save the merged data to a CSV file
         stock_i_p = stock_i_p.rename(columns={'Close': ticker}) # rename the closing price column to the stock ticker
         stock_i_p_df = pd.DataFrame(stock_i_p) # turn closing price column into a dataframe
         price_df = pd.merge(price_df, stock_i_p_df, on='Date')  #append price data to the main dataframe
-    price_df.to_csv(f'EzQuant/Data/Processed/full_price_history.csv', index=False)  # save the full price history to a CSV file
+    price_df.to_csv(f'Data/Processed/full_price_history.csv', index=False)  # save the full price history to a CSV file
     return price_df
 
 def calculate_covariance_matrix(price_df):
     price_df = price_df.drop(columns="Date")
     price_df = price_df.pct_change()
     covariance_matrix = price_df.cov()
-    covariance_matrix.to_csv(f'EzQuant/Data/Processed/full_covariance_matrix.csv')
+    covariance_matrix.to_csv(f'Data/Processed/full_covariance_matrix.csv')
 main()
