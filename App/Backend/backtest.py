@@ -3,7 +3,7 @@ import numpy as np
 import statistics as stat
 
 def main():
-    returns = pd.read_csv('EzQuant/Data/Processed/full_price_history.csv')
+    returns = pd.read_csv('Data/Processed/full_price_history.csv')
     returns['Date'] = pd.to_datetime(returns['Date'], utc=True).dt.tz_localize(None).dt.normalize()
     total_return, final_portfolio_value, Portfolio_SharpeRatio, years = player_portfolio_backtest(returns)
     print(f'The final portfolio value is: ${final_portfolio_value:,.2f}')
@@ -62,20 +62,28 @@ def backtest_static(start_date, end_date,  returns, initial_capital=0):
 
 
     #Reduce the stocks to just the user's portfolio
-    portfolio = pd.read_csv('EzQuant/Data/Portfolio/portfolio.csv',index_col=None, header=0)
+    portfolio = pd.read_csv('Data/Portfolio/portfolio.csv',index_col=None, header=0)
     portfolio['Value'] = portfolio['Value'].astype(float)
     portfolio_stocks = portfolio['Stock'].tolist()
     portfolio_stocks = ['Date'] + portfolio_stocks
    
     #Calculate the returns of all stocks over the portfolio period
+    '''
+        in fact this part will need to be changed to be a function that can be called from somewhere else, 
+        as the code and data is used in the hedging.py and optimiser.py files as well, which dont actually utilise backtesting
+    '''
+
     portfolio_returns = returns[portfolio_stocks]
-    print(portfolio_returns)
-    range_returns = portfolio_returns.loc[(returns['Date'] >= pd.to_datetime(start_date)) & (returns['Date'] <= pd.to_datetime(end_date))]
-    returns_change = range_returns.drop(columns=['Date'])
+
+    returns_change = portfolio_returns.drop(columns=['Date'])
     returns_change = returns_change.pct_change()
-    returns_change.insert(0, 'Date', range_returns['Date'])
-    returns_change = returns_change.iloc[1:]  # Remove the first row which will be NaN after pct_change
-    returns_change.to_csv(f'EzQuant/Data/Processed/backtest_percentage_returns.csv', index=False)
+    returns_change.insert(0, 'Date', portfolio_returns['Date'])
+    returns_change = returns_change.iloc[1:]  
+    print(returns_change)
+    returns_change.to_csv(f'Data/Processed/total_backtest_percentage_returns.csv', index=False)
+    range_returns = returns_change.loc[(returns['Date'] >= pd.to_datetime(start_date)) & (returns['Date'] <= pd.to_datetime(end_date))]
+ 
+    range_returns.to_csv(f'Data/Processed/shortened_backtest_percentage_returns.csv', index=False)
 
     #Calculate average weekly returns of portfolio for each week
     total_portfolio_returns = pd.Series(dtype='float64')
@@ -105,7 +113,7 @@ def backtest_static(start_date, end_date,  returns, initial_capital=0):
     """
     final_portfolio_value = current_portfolio_value
     total_portfolio_returns = pd.DataFrame({'Week': returns_change['Date'], 'Weekly_Return': return_list})
-    total_portfolio_returns.to_csv(f'EzQuant/Data/Processed/backtest_total_returns.csv', index=False)
+    total_portfolio_returns.to_csv(f'Data/Processed/backtest_total_returns.csv', index=False)
     total_return = (final_portfolio_value - initial_capital)/initial_capital
 
 
