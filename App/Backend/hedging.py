@@ -5,8 +5,9 @@ def main():
     returns = pd.read_csv('Data/Processed/total_backtest_percentage_returns.csv') #read in list of percentage changes for every day.
     portfolio_returns = reduce_to_portfolio(returns, portfolio) #reduce stock to just the stocks the user has decided for their portfolio.
     build_portfolio_cov_matrix(portfolio_returns, portfolio) #build cov matrix of just portfolio stocks. 
-    build_adapted_covariance_matrix(total_portfolio_returns, portfolio) #build 
-    stock_recommendation, covariance_value = recommend_hedge()
+    total_portfolio_returns = calculate_total_portfolio_returns(portfolio_returns, portfolio) #calculate the total returns of the user's portfolio, based on the percentage change of each stock in the portfolio and the weighting of each stock in the portfolio.
+    covariance_matrix = build_adapted_covariance_matrix(total_portfolio_returns, portfolio) #build 
+    stock_recommendation, covariance_value = recommend_hedge(covariance_matrix) #recommend the best stock to hedge the user's portfolio based on the covariance matrix of all stocks and the user's portfolio.
     print(f"The best stock to hedge your portfolio is {stock_recommendation} with a covariance value of {covariance_value}")
 
 def reduce_to_portfolio(returns, portfolio): #reduce stock to just the stocks the user has decided for their portfolio.
@@ -18,7 +19,7 @@ def reduce_to_portfolio(returns, portfolio): #reduce stock to just the stocks th
 
 
 def build_portfolio_cov_matrix(returns, portfolio):  #function designed to create a covariance matrix of all stocks included in the user's portfolio. This is then used for optimisation.
-    returns_change = return_list.drop(columns=['Date']) #remove the date data, so covariance (on lists of floats rather than datettime) can be calculated for each stock in the portfolio.
+    returns_change = returns.drop(columns=['Date']) #remove the date data, so covariance (on lists of floats rather than datettime) can be calculated for each stock in the portfolio.
     returns_change.cov().to_csv(f'Data/Portfolio/covariance_matrix.csv', index=True) #calculate the cov matrix of just included portfolio and then save it as a CSV for later use.
     print(returns_change.cov())
     returns_change.insert(0, 'Date', returns['Date']) #re-insert the date column, so returns can be calculated for each week in the portfolio.
@@ -30,7 +31,7 @@ def calculate_total_portfolio_returns(returns_change, portfolio): #function desi
     for return_index, return_row in returns_change.iterrows():
         weekly_value_i = 0
         for portfolio_index, portfolio_row in portfolio.iterrows():
-            stock_i_value = portfolio_row['Weighting']
+            stock_i_value = portfolio_row['Weight']
             stock_i = portfolio_row['Stock']
             stock_i_value = stock_i_value * return_row[stock_i]
             portfolio.loc[portfolio_index, 'Value'] = stock_i_value
@@ -53,18 +54,21 @@ def build_adapted_covariance_matrix(portfolio_returns, portfolio):
     all_returns_refined = all_returns_refined.iloc[1:]
     all_returns_refined['Date'] = pd.to_datetime(all_returns_refined['Date'], utc=True).dt.date  ###ensuring that date formats are the same for both dataframes
 
-   
-    portfolio_returns = portfolio_returns.drop(columns=portfolio_returns.columns[0])
+    portfolio_returns = portfolio_returns.drop(columns=['Date']) ### The following script was designed because of restrictive CPU load times which limits how data can be transferrred and therefore it leads to nothing being visible.
+    print(f"Portfolio Returns:\n{portfolio_returns}")
+    merged_returns = pd.concat([all_returns_refined, portfolio_returns], axis=1)
     merged_returns = merged_returns.drop(columns=['Date'])
     merged_returns = merged_returns.rename(columns={'Portfolio_Return': 'Portfolio'})
     merged_returns = merged_returns.drop(columns=remove_stocks)
     covariance_matrix = merged_returns.cov()
     covariance_matrix.to_csv('Data/Portfolio/adapted_covariance_matrix.csv')
+    return covariance_matrix
 
 
-def recommend_hedge():
-    covariance_matrix = pd.read_csv('Data/Portfolio/adapted_covariance_matrix.csv', index_col =0, header=0)
+def recommend_hedge(covariance_matrix):
+    print(f"Covariance Matrix:\n{covariance_matrix}")
     covariance_matrix = covariance_matrix.iloc[1:]
+    print(f"Covariance Matrix (without Portfolio row):\n{covariance_matrix}")
     cov_value_i = 1
     for cov_index, cov_row in covariance_matrix.iterrows():
         cov_value_o = cov_row['Portfolio']
