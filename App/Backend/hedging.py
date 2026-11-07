@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-def main():
+def hedge():
     portfolio = pd.read_csv('Data/Portfolio/portfolio.csv',index_col=None, header=0) #read in list of stocks and their weights in portfolio (all data is saved as CSVs to be easily accessed, readable, and straightforward to call later.)
     returns = pd.read_csv('Data/Processed/total_backtest_percentage_returns.csv') #read in list of percentage changes for every day.
     portfolio_returns = reduce_to_portfolio(returns, portfolio) #reduce stock to just the stocks the user has decided for their portfolio.
@@ -8,7 +8,7 @@ def main():
     total_portfolio_returns = calculate_total_portfolio_returns(portfolio_returns, portfolio) #calculate the total returns of the user's portfolio, based on the percentage change of each stock in the portfolio and the weighting of each stock in the portfolio.
     covariance_matrix = build_adapted_covariance_matrix(total_portfolio_returns, portfolio) #build 
     stock_recommendation, covariance_value = recommend_hedge(covariance_matrix) #recommend the best stock to hedge the user's portfolio based on the covariance matrix of all stocks and the user's portfolio.
-    print(f"The best stock to hedge your portfolio is {stock_recommendation} with a covariance value of {covariance_value}")
+    return stock_recommendation, covariance_value
 
 def reduce_to_portfolio(returns, portfolio): #reduce stock to just the stocks the user has decided for their portfolio.
     portfolio['Value'] = portfolio['Value'].astype(float) #ensure that the value column (of how much each stock is worth in the portfolio) is a float.
@@ -51,7 +51,7 @@ def build_adapted_covariance_matrix(portfolio_returns, portfolio):
     all_returns_refined = all_returns.drop(columns=['Date'])
     all_returns_refined = all_returns_refined.pct_change()
     all_returns_refined.insert(0, 'Date', all_returns['Date'])
-    all_returns_refined = all_returns_refined.iloc[1:]
+    all_returns_refined = all_returns_refined.iloc[1:].reset_index(drop=True)
     all_returns_refined['Date'] = pd.to_datetime(all_returns_refined['Date'], utc=True).dt.date  ###ensuring that date formats are the same for both dataframes
 
     portfolio_returns = portfolio_returns.drop(columns=['Date']) ### The following script was designed because of restrictive CPU load times which limits how data can be transferrred and therefore it leads to nothing being visible.
@@ -67,7 +67,7 @@ def build_adapted_covariance_matrix(portfolio_returns, portfolio):
 
 def recommend_hedge(covariance_matrix):
     print(f"Covariance Matrix:\n{covariance_matrix}")
-    covariance_matrix = covariance_matrix.iloc[1:]
+    covariance_matrix = covariance_matrix.drop(index='Portfolio')
     print(f"Covariance Matrix (without Portfolio row):\n{covariance_matrix}")
     cov_value_i = 1
     for cov_index, cov_row in covariance_matrix.iterrows():
@@ -78,5 +78,12 @@ def recommend_hedge(covariance_matrix):
     return stock_recommendation, cov_value_i
 
    
-
-main()
+   
+   
+def main():
+    stock_recommendation, covariance_value = hedge()
+    print(f"The best stock to hedge your portfolio is {stock_recommendation} with a covariance value of {covariance_value}")
+   
+  
+if __name__ == '__main__':
+    main()

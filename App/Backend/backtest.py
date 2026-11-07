@@ -73,8 +73,8 @@ def backtest_preperation(returns, start_date, end_date):
 
 
 def backtest_static(start_date, end_date,  shortened_returns, initial_capital=0):
-
-
+    
+    
     #Reduce the stocks to just the user's portfolio
     portfolio = pd.read_csv('Data/Portfolio/portfolio.csv',index_col=None, header=0)
     portfolio['Value'] = portfolio['Value'].astype(float)
@@ -99,6 +99,7 @@ def backtest_static(start_date, end_date,  shortened_returns, initial_capital=0)
     return_list = []
     current_portfolio_value = initial_capital
     weekly_value_o = portfolio['Value'].sum()  # Initial portfolio value
+    cash = initial_capital - weekly_value_o
     for return_index, return_row in portfolio_returns_change.iterrows():
         weekly_value_i=0
         for portfolio_index, portfolio_row in portfolio.iterrows():
@@ -110,7 +111,7 @@ def backtest_static(start_date, end_date,  shortened_returns, initial_capital=0)
         weekly_return = (weekly_value_i - weekly_value_o)/weekly_value_o
         weekly_value_o = weekly_value_i
         return_list.append(weekly_return)
-        current_portfolio_value = current_portfolio_value*(1+weekly_return)
+        current_portfolio_value = weekly_value_i + cash
 
     """
     Sharpe Ratio = (E(x) - Rf)/SD(x)
@@ -178,5 +179,6 @@ def calculate_SD_and_Ex(return_list):
     Ex = sum(return_list) / len(return_list)
     return SD, Ex
 
-main()
+if __name__ == "__main__":
+    main()
 

@@ -1,5 +1,5 @@
 import time
-import EzQuantReal.EzQuant.App.Backend.backtest as bt
+import EzQuant.App.Backend.backtest as bt
 
 def main():
     print("yo wsg my g")
@@ -17,7 +17,11 @@ def main():
 
 
 def choose_stocks(all_stock_list):
-    stocks = []
+    stocks = ['JNJ', 'JPM', 'PG', 'XOM',
+                'NEE', 'CAT', 'LIN', 'PLD',
+                'MCD','WMT','BA','UPS',
+                'INTC','V','WM',
+                ]
     while True:
         stock = input("Enter a stock ticker (e.g., AAPL, JNJ, JPM): ")
         if stock.lower() == 'done':

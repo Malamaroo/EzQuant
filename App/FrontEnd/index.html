@@ -5,21 +5,36 @@
 <head>
     <meta charset="UTF-8">
     <title>EzQuant</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="Images/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="Images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="Images/favicon-16x16.png">
-    <link rel="manifest" href="Images/site.webmanifest">
-    <link rel="stylesheet" href="Static/CSS/style.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="static/Static/Images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/Static/Images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="static/Static/Images/favicon-16x16.png">
+    <link rel="manifest" href="static/Static/Images/site.webmanifest">
+    <link rel="stylesheet" href="static/Static/CSS/style.css">
 </head>
 <body>
     <header>
         <h1>EzQuant</h1>
         <h2>Your Quantitative Training Platform!</h2>
     </header>
+        <section>
+            <button id="HelloButton">Click Me!</button>
+            <p id="HelloMessage"></p>
+        </section>
+        <section>
+            <h2>Step 1: Choose your stocks</h2> 
+            <h3>You have a total allowance of $1,000,000</h3>
+            <h3>Each stock must be purchased with a minimum of $5,000</h3>
+        <div id="stock_list"></div>
+        <button id="save_portfolio_button">Save Portfolio</button>
+        <button id="reset_portfolio_button">Reset Portfolio</button>
+        <p id="save_portfolio_message"></p>
 
-    <h2>Flask and Frontend Connected!</h2>
-
-
-    <script src="Static/JS/main.js"></script>
+        </section>
+        <section>
+            <h2>Step 2: Hedge your portfolio</h2>
+            <button id="hedge_portfolio_button">Hedge Portfolio</button>
+            <p id="hedge_portfolio_message"></p>
+        </section>
+    <script src="/static/Static/JS/app.js"></script>
 </body>
 </html>
