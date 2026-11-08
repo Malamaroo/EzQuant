@@ -24,7 +24,7 @@
             <h2>Step 1: Choose your stocks</h2> 
             <h3>You have a total allowance of $1,000,000</h3>
             <h3>Each stock must be purchased with a minimum of $5,000</h3>
-        <div id="stock_list"></div>
+        <div id="stock_list" class="TextCenter"></div>
         <button id="save_portfolio_button">Save Portfolio</button>
         <button id="reset_portfolio_button">Reset Portfolio</button>
         <p id="save_portfolio_message"></p>
@@ -52,6 +52,27 @@
             <p id="optimise_portfolio_message"></p>
             <div id="optimised_portfolio"></div>
         </section>
+        <section>
+            <h2>Step 4: Backtest your portfolio</h2>
+            <p class="TextCenter">Backtesting is the process of testing a trading strategy on historical data to see how it would have performed. 
+                It allows traders to evaluate the effectiveness of their strategies and make informed decisions about their trading approach. 
+                By simulating trades based on past market conditions, backtesting helps traders identify potential strengths and weaknesses in their strategies, 
+                enabling them to refine and optimize their approach before risking real capital in live markets.</p>
+            <label>
+                Start date
+                <input type ="date" id="backtest_start_date">
+            </label>
+            <label>
+                End date
+                <input type ="date" id="backtest_end_date">
+            </label>
+            <button id="backtest_button">Run backtest</button>
+            <p id="backtest_message"></p>
+            <div id="backtest_results"></div>
+            <canvas id="backtest_chart"></canvas>
+        </section>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="/static/Static/JS/app.js"></script>
+
 </body>
 </html>

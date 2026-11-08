@@ -7,8 +7,8 @@ def main():
     returns['Date'] = pd.to_datetime(returns['Date'], utc=True).dt.tz_localize(None).dt.normalize()
     start_date, end_date = collect_dates()
     shortened_returns = backtest_preperation(returns, start_date, end_date)
-    total_return, final_portfolio_value, years = player_portfolio_backtest(shortened_returns, start_date, end_date)
-    final_value, values_list = backtest_strategy_value(returns, shortened_returns, start_date, end_date, initial_capital=1000000)
+    total_return, final_portfolio_value, years, values_list, dates_list = player_portfolio_backtest(shortened_returns, start_date, end_date)
+    final_value, pe_values_list, pe_dates_list  = backtest_strategy_value(returns, shortened_returns, start_date, end_date, initial_capital=1000000)
     
     print(f'The final portfolio value is: ${final_portfolio_value:,.2f}')
     print(f'The total return of the portfolio over the backtest period was: {total_return:.2%}')
@@ -16,11 +16,29 @@ def main():
     print(f'The average annual return of the portfolio over the backtest period was: {(total_return/years):.2%}')
 
 def player_portfolio_backtest(total_returns, start_date=None, end_date=None):
-    print("Please write in yyyy-mm-dd format!")
     years = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days / 365.25)
-    total_return, final_portfolio_value = backtest_static(start_date, end_date, total_returns, initial_capital=1000000)
-    return total_return, final_portfolio_value, years
+    total_return, final_portfolio_value, values_list, dates_list = backtest_static(start_date, end_date, total_returns, initial_capital=1000000)
+    return total_return, final_portfolio_value, years, values_list, dates_list
 
+def run_backtest(start_date, end_date):
+    returns = pd.read_csv('Data/Processed/full_price_history.csv')
+    returns['Date'] = pd.to_datetime(returns['Date'], utc=True).dt.tz_localize(None).dt.normalize()
+    shortened_returns = backtest_preperation(returns, start_date, end_date)
+    total_return, final_portfolio_value, years, values_list, dates_list = player_portfolio_backtest(shortened_returns, start_date, end_date)
+    pe_final_value, pe_values_list, pe_dates_list  = backtest_strategy_value(returns, shortened_returns, start_date, end_date, initial_capital=1000000)
+    
+    backtest_data = {
+        'dates': [date.strftime('%Y-%m-%d') for date in dates_list],
+        'values': values_list,
+        'final_portfolio_value': final_portfolio_value,
+        'total_return': total_return,
+        'years': years,
+        'average_annual_return': (total_return / years),
+        'pe_values': pe_values_list,
+        'pe_final_value': pe_final_value,
+        'pe_total_return': (pe_final_value - 1000000) / 1000000,
+    }
+    return backtest_data
 
 def collect_dates():
     start_date =collect_start_date()
@@ -100,6 +118,8 @@ def backtest_static(start_date, end_date,  shortened_returns, initial_capital=0)
     current_portfolio_value = initial_capital
     weekly_value_o = portfolio['Value'].sum()  # Initial portfolio value
     cash = initial_capital - weekly_value_o
+    values_list = [initial_capital]
+    dates_list = [shortened_returns['Date'].iloc[0]]
     for return_index, return_row in portfolio_returns_change.iterrows():
         weekly_value_i=0
         for portfolio_index, portfolio_row in portfolio.iterrows():
@@ -112,6 +132,8 @@ def backtest_static(start_date, end_date,  shortened_returns, initial_capital=0)
         weekly_value_o = weekly_value_i
         return_list.append(weekly_return)
         current_portfolio_value = weekly_value_i + cash
+        values_list.append(current_portfolio_value)
+        dates_list.append(return_row['Date'])
 
     """
     Sharpe Ratio = (E(x) - Rf)/SD(x)
@@ -128,7 +150,7 @@ def backtest_static(start_date, end_date,  shortened_returns, initial_capital=0)
 
 
 
-    return total_return, final_portfolio_value
+    return total_return, final_portfolio_value, values_list, dates_list
 
 def backtest_strategy_value(data, specified_returns, start_date, end_date, initial_capital=1000000):
     pe_ratios = pd.read_csv('Data/Processed/full_pe_ratios.csv', header=0, index_col=None)
@@ -138,8 +160,15 @@ def backtest_strategy_value(data, specified_returns, start_date, end_date, initi
     stock_ratios = []
     value = initial_capital
     values_list = [initial_capital]
+    dates_list = [specified_returns['Date'].iloc[0]]
+
+    
     for ratio_index, ratio_row in shortened_pe_ratios.iterrows():
         current_pe_ratio = 100
+        stock_to_buy = None
+        next_index = ratio_index + 1
+        if next_index not in specified_returns.index:
+            break
         for stock_name in specified_returns.columns:
             if stock_name == 'Date':
                 continue
@@ -154,18 +183,18 @@ def backtest_strategy_value(data, specified_returns, start_date, end_date, initi
                         if ratio_row[stock_name] < current_pe_ratio:
                             current_pe_ratio = ratio_row[stock_name]
                             stock_to_buy = stock_name
-                            stock_ratios.append(current_pe_ratio)
-                            purchased_stocks.append(stock_to_buy)
-    
-        percentage_change = specified_returns.at[ratio_index, stock_to_buy]
-        value = value * (1 + percentage_change)
+                            
+                            
+        if stock_to_buy is not None:
+            stock_ratios.append(current_pe_ratio)
+            purchased_stocks.append(stock_to_buy)
+            percentage_change = specified_returns.at[next_index, stock_to_buy]
+            value = value * (1 + percentage_change)
         values_list.append(value)
-        print(specified_returns.at[ratio_index, 'Date'])
-        if ratio_index >= 50:
-                print(f"Week: {ratio_row['Date']}, Stock: {stock_to_buy}, PE Ratio: {current_pe_ratio}, Percentage Change: {percentage_change:.2%}, Portfolio Value: ${value:,.2f}")
-    value_returns = pd.DataFrame({'Date': specified_returns['Date'], 'Portfolio_Value': values_list})
-    value_returns.to_csv(f'Data/Processed/backtest_value_strategy.csv', index=False)
-    return value, values_list
+        dates_list.append(specified_returns.at[next_index, 'Date'])
+        print(specified_returns.at[next_index, 'Date'])
+
+    return value, values_list, dates_list
 
 def backtest_strategy_momentum(data, strategy_func, initial_capital=10000):
     return

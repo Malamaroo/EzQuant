@@ -93,3 +93,146 @@ resetButton.addEventListener('click', async () => {
     const data = await response.json();
     saveMessage.textContent = data.message;
 });
+
+
+// ===== Step 3: Optimise =====
+const riskInput = document.getElementById('risk_range_input');
+const optimiseButton = document.getElementById('optimise_portfolio_button');
+const optimiseMessage = document.getElementById('optimise_portfolio_message');
+const optimisedPortfolioDiv = document.getElementById('optimised_portfolio');
+
+optimiseButton.addEventListener('click', async () => {
+    const risk = Number(riskInput.value);
+    if (risk <= 0) {
+        optimiseMessage.textContent = 'Please enter a target risk, e.g. 0.15 for 15% yearly volatility.';
+        return;
+    }
+
+    optimiseMessage.textContent = 'Optimising...';
+    optimisedPortfolioDiv.innerHTML = '';
+
+    const response = await fetch('/api/optimise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ yearly_risk: risk }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        optimiseMessage.textContent = data.error;
+        return;
+    }
+
+    optimiseMessage.textContent = 'Portfolio optimised and saved!';
+
+    // Build a table, one row per stock
+    let tableHtml = '<table><tr><th>Stock</th><th>Weight</th><th>Value</th></tr>';
+    for (const row of data.new_portfolio) {
+        tableHtml += `<tr>
+            <td>${row.Stock}</td>
+            <td>${(row.Weight * 100).toFixed(2)}%</td>
+            <td>$${Math.round(row.Value).toLocaleString()}</td>
+        </tr>`;
+    }
+    tableHtml += '</table>';
+    optimisedPortfolioDiv.innerHTML = tableHtml;
+});
+
+
+// ===== Step 4: Backtest =====
+const backtestStartInput = document.getElementById('backtest_start_date');
+const backtestEndInput = document.getElementById('backtest_end_date');
+const backtestButton = document.getElementById('backtest_button');
+const backtestMessage = document.getElementById('backtest_message');
+const backtestResults = document.getElementById('backtest_results');
+const backtestChartCanvas = document.getElementById('backtest_chart');
+const backtestDateRangeMessage = document.getElementById('backtest_date_range_message');
+let backtestChart = null;      // holds the chart once it's drawn
+
+async function loadBacktestDateRange() {
+    const response = await fetch('/api/backtest/date-range');
+    const data = await response.json();
+
+    // Limit both date pickers to the dates we actually have
+    backtestStartInput.min = data.first_date;
+    backtestStartInput.max = data.last_date;
+    backtestEndInput.min = data.first_date;
+    backtestEndInput.max = data.last_date;
+
+    // Pre-fill with the full range, so the user can just click Run
+    backtestStartInput.value = data.first_date;
+    backtestEndInput.value = data.last_date;
+
+    backtestDateRangeMessage.textContent = `Data is available from ${data.first_date} to ${data.last_date}.`;
+}
+
+loadBacktestDateRange();
+
+backtestButton.addEventListener('click', async () => {
+    backtestMessage.textContent = 'Running backtest...';
+    backtestResults.innerHTML = '';
+
+    const response = await fetch('/api/backtest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            start_date: backtestStartInput.value,
+            end_date: backtestEndInput.value,
+        }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+        backtestMessage.textContent = data.error;
+        return;
+    }
+    backtestMessage.textContent = '';
+
+    backtestResults.innerHTML = `
+        <p>Final portfolio value: <strong>$${Math.round(data.final_portfolio_value).toLocaleString()}</strong></p>
+        <p>Total return: <strong>${(data.total_return * 100).toFixed(2)}%</strong></p>
+        <p>Backtest period: <strong>${data.years.toFixed(2)} years</strong></p>
+        <p>Average annual return: <strong>${(data.average_annual_return * 100).toFixed(2)}%</strong></p>
+        <p>P/E strategy final value: <strong>$${Math.round(data.pe_final_value).toLocaleString()}</strong></p>
+        <p>P/E strategy total return: <strong>${(data.pe_total_return * 100).toFixed(2)}%</strong></p>
+    `;
+
+    drawBacktestChart(data.dates, data.values, data.pe_values);
+});
+
+function drawBacktestChart(dates, values, peValues) {
+    // If there's already a chart from an earlier backtest, remove it first
+    if (backtestChart !== null) {
+        backtestChart.destroy();
+    }
+
+    backtestChart = new Chart(backtestChartCanvas, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Your portfolio',
+                    data: values,
+                    borderColor: '#1f3a93',
+                    pointRadius: 0,
+                },
+                {
+                    label: 'P/E value strategy',      // NEW: the second line
+                    data: peValues,
+                    borderColor: '#c0392b',
+                    pointRadius: 0,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: {
+                    ticks: {
+                        callback: (value) => '$' + value.toLocaleString(),
+                    },
+                },
+            },
+        },
+    });
+}
