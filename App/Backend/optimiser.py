@@ -94,6 +94,11 @@ def prepare_optimisation():
     min_weight = (85 / n_stocks) / 100
     return risk, mean_returns, cov_matrix, min_weight
 def main():
+    import pandas as pd
+    from fredapi import Fred
+    import statistics as stat
+    import numpy as np
+    from pypfopt import EfficientFrontier, expected_returns, risk_models
     return_list = pd.read_csv('Data/Portfolio/portfolio_returns.csv')
     return_list = return_list['Portfolio_Return'].tolist()
  
@@ -113,5 +118,5 @@ def main():
     portfolio['Value'] = value_list
     portfolio.to_csv('Data/Portfolio/portfolio.csv', index=False)
 
-
-main()
+if __name__ == "__main__":
+    main()

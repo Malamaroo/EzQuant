@@ -35,6 +35,23 @@
             <button id="hedge_portfolio_button">Hedge Portfolio</button>
             <p id="hedge_portfolio_message"></p>
         </section>
+        <section>
+            <h2>Step 3: Optimise your portfolio</h2>
+            <p class="TextCenter">The following optimisation is based on Mean-variance optimisation. 
+                The mathematical framework is derived from Harry Markowitz's Modern Portfolio Theory. 
+                The notion is that the formula will optimise your portfolio to deliver the highest possible expected return for a given level of risk
+                , the lowest risk for a given target return, or the lowest possible risk. In this instance, the optimisation will be based upon maximising returns for a given level of risk.
+                 So, please specify what level of risk you are comfortable with. This is measured as the volatility of the portfolio. Effectively, your portfolio will sit on the efficient frontier for your specified volatility.</p>
+                 <img src="static/Static/Images/efficient-frontier-feasible-portfolios-1.png" alt="Efficient Frontier" class="frontier-img">
+            <p id = "risk_range_message"></p>
+            <label>
+                Target risk (volatility) for your portfolio:
+                <input type="number" id="risk_range_input" min="0.01" max="0.99" step="0.01">
+            </label>
+            <button id="optimise_portfolio_button">Optimise Portfolio</button>
+            <p id="optimise_portfolio_message"></p>
+            <div id="optimised_portfolio"></div>
+        </section>
     <script src="/static/Static/JS/app.js"></script>
 </body>
 </html>
