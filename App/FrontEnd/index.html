@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-
+<!--
+    This is the one page of the website. The layout is: the sticky portfolio panel, the intro, then the four steps (stocks, hedge, optimise, backtest).
+    AI DISCLOSURE: the html was mostly written by me (the intro, the text and layout of steps 1-3, and the footer).
+    The parts written by AI (Claude) are marked with "AI WRITTEN" comments: the sticky portfolio panel, the stock search box, and the whole of the step 4 backtest section.
+-->
 <html>
 
 <head>
@@ -9,29 +13,53 @@
     <link rel="icon" type="image/png" sizes="32x32" href="static/Static/Images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="static/Static/Images/favicon-16x16.png">
     <link rel="manifest" href="static/Static/Images/site.webmanifest">
+    <link rel="stylesheet" href="https://use.typekit.net/usd8tva.css">
     <link rel="stylesheet" href="static/Static/CSS/style.css">
 </head>
 <body>
+    <!-- AI WRITTEN: the sticky portfolio panel, app.js fills in the table -->
+    <aside id="portfolio_panel">
+        <details open>
+            <summary>Your portfolio</summary>
+            <div id="portfolio_panel_body">Loading...</div>
+        </details>
+    </aside>
+
     <header>
+        <img src="static/Static/Images/favicon-32x32.png" alt="EzQuant Logo" class="logo">
         <h1>EzQuant</h1>
         <h2>Your Quantitative Training Platform!</h2>
+        <p>Welcome to EzQuant, your gateway to quantitative finance education!</p>
+        <p>EzQuant helps you learn the principles of quantitative finance through a fun, digestible journey.
+            You will learn the fundamentals of portfolio management, hedging, and optimisation; based upon Harry' Markowitz's Modern Portfolio Theory.
+            In other words, you will learn how to create a portfolio that both balances risk, and then maximises returns for your specified risk. Therefore, you will:
+        </p>
+        <p>1. Choose your stocks</p>
+        <p>2. Hedge your portfolio (optional and repeatable)</p>
+        <p>3. Optimise your portfolio</p>
+        <p>4. Backtest your portfolio, and compare performance with other trading strategies!</p>
+        <p>5. Repeat steps 1-4 until you are happy with your portfolio</p>
     </header>
-        <section>
-            <button id="HelloButton">Click Me!</button>
-            <p id="HelloMessage"></p>
-        </section>
         <section>
             <h2>Step 1: Choose your stocks</h2> 
             <h3>You have a total allowance of $1,000,000</h3>
-            <h3>Each stock must be purchased with a minimum of $5,000</h3>
+            <p>Each stock must be purchased with a minimum of $5,000</p>
+            <p>Please enter your desired value for each stock, and then tick the corresponding checkbox.</p>
+            <p>Please press <b>Save Portfolio</b> to check your current portfolio or commit your portfolio. Furthermore, please press <b>Reset Portfolio</b> to start over.</p>
+        <!-- AI WRITTEN: the search box (just the search box and its message, the stock list below is mine) -->
+        <input type="text" id="stock_search" placeholder="Search for a stock, e.g. JNJ">
+        <p id="stock_search_message"></p>
         <div id="stock_list" class="TextCenter"></div>
-        <button id="save_portfolio_button">Save Portfolio</button>
-        <button id="reset_portfolio_button">Reset Portfolio</button>
+        <div class="button-row">
+            <button id="save_portfolio_button">Save Portfolio</button>
+            <button id="reset_portfolio_button">Reset Portfolio</button>
+        </div>
         <p id="save_portfolio_message"></p>
 
         </section>
         <section>
-            <h2>Step 2: Hedge your portfolio</h2>
+            <h2>Step 2 (optional): Hedge your portfolio</h2>
+            <p class="TextCenter">Hedging suggests a stock that has the most negatively correlated variance compared to your current portfolio. Traders add hedges to reduce a portfolio's risk. If you like, you can add this recommended stock to your portfolio, thereby reducing its potential risk. Hedging is both optional and repeatable.</p>
             <button id="hedge_portfolio_button">Hedge Portfolio</button>
             <p id="hedge_portfolio_message"></p>
         </section>
@@ -52,12 +80,14 @@
             <p id="optimise_portfolio_message"></p>
             <div id="optimised_portfolio"></div>
         </section>
+        <!-- AI WRITTEN: the whole of the step 4 backtest section (date pickers, results and the chart) -->
         <section>
             <h2>Step 4: Backtest your portfolio</h2>
             <p class="TextCenter">Backtesting is the process of testing a trading strategy on historical data to see how it would have performed. 
                 It allows traders to evaluate the effectiveness of their strategies and make informed decisions about their trading approach. 
                 By simulating trades based on past market conditions, backtesting helps traders identify potential strengths and weaknesses in their strategies, 
                 enabling them to refine and optimize their approach before risking real capital in live markets.</p>
+            <p id="backtest_date_range_message"></p>
             <label>
                 Start date
                 <input type ="date" id="backtest_start_date">
@@ -69,10 +99,22 @@
             <button id="backtest_button">Run backtest</button>
             <p id="backtest_message"></p>
             <div id="backtest_results"></div>
+            <p id="backtest_progress"></p>
             <canvas id="backtest_chart"></canvas>
         </section>
+    <footer>
+        <p><strong>EzQuant</strong>: your quantitative training platform</p>
+        <p>Backend and formula created by Lucas Korab. Frontend created with the assistance of Claude.</p>
+        <p>Stack: Python, Flask, JavaScript, HTML, CSS, Chart.js</p>
+        <p>
+            <a href="https://github.com/Malamaroo" target="_blank" rel="noopener">GitHub</a> ·
+            <a href="https://au.linkedin.com/in/lucas-korab-00809337a" target="_blank" rel="noopener">LinkedIn</a>
+        </p>
+        <p class="disclaimer">For educational purposes only. Nothing here is financial advice. Backtests use historical data and do not predict future returns.</p>
+        <p class="copyright">© 2026 Lucas Korab</p>
+    </footer>
+    <!-- Chart.js draws the backtest graph, then app.js (AI written, see the top of that file) runs the page -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="/static/Static/JS/app.js"></script>
-
 </body>
 </html>

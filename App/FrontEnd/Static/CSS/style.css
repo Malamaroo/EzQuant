@@ -1,11 +1,35 @@
-body {
-background-color: #e28615;
-font-family: 'Poppins', sans-serif;
+/*
+    AI DISCLOSURE: the colours, fonts, logo and image styling are mine.
+    The parts written by AI (Claude) are marked with "AI WRITTEN": the white card layout, the buttons,
+    and everything for the sticky portfolio panel (including the wide screen media query at the bottom).
+*/
+:root {
+    --margin-colour: #FFA213;   /* try #ADEEC5 here to compare */
+    --card-colour: #ffffff;
+    --accent-colour: #ADEEC5;
 }
-.TextCenter {
-    text-align: center;
+
+body {
+    background-color: var(--margin-colour);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 1rem;
+}
+
+/* AI WRITTEN: Each section is a white card in a centred column */
+header, section, footer {
+    box-sizing: border-box;
     max-width: 700px;
-    margin: 0 auto;
+    margin: 0 auto 1.5rem auto;
+    padding: 1.5rem;
+    background-color: var(--card-colour);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-align: left;
+}
+
+header h1 {
+    text-align: center;
 }
 
 .frontier-img {
@@ -13,4 +37,93 @@ font-family: 'Poppins', sans-serif;
     margin: 1rem auto;
     max-width: 100%;
     height: auto;
+}
+
+h1 { font-family: "minion-3-caption", serif; font-weight: 700; font-style: normal; }
+h2 { font-family: "minion-3-caption", serif; font-weight: 600; font-style: italic; }
+h3 { font-family: "minion-3-caption", serif; font-weight: 500; font-style: normal; }
+p  { font-family: "minion-3-caption", serif; font-weight: 400; font-style: normal; }
+
+.logo {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+}
+
+title {
+    font-family: "minion-3-caption", serif;
+    font-weight: 800;
+    font-style: normal;
+    font-size: 4rem;
+}
+
+/* AI WRITTEN: .button-row, button and button:hover */
+.button-row {
+    display: flex;
+    justify-content: center;   /* use flex-start for left, center for middle */
+    gap: 1rem;
+}
+
+button {
+    background-color: var(--accent-colour);
+    color: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-family: "minion-3-caption", serif;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(0.92);
+}
+
+/* AI WRITTEN: all of the #portfolio_panel rules, down to the end of the file */
+#portfolio_panel {
+    box-sizing: border-box;
+    position: sticky;            /* narrow screens: a bar that sticks to the top */
+    top: 0;
+    z-index: 10;
+    max-width: 700px;
+    margin: 0 auto 1rem auto;
+    padding: 0.75rem 1rem;
+    background-color: var(--card-colour);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#portfolio_panel summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#portfolio_panel table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+#portfolio_panel th,
+#portfolio_panel td {
+    padding: 0.2rem 0.3rem;
+    text-align: right;
+}
+
+#portfolio_panel th:first-child,
+#portfolio_panel td:first-child {
+    text-align: left;
+}
+
+/* Wide screens: float it in the left margin instead */
+@media (min-width: 1280px) {
+    #portfolio_panel {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        width: 240px;
+        margin: 0;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;        /* scrollbar if the portfolio is long */
+    }
 }
