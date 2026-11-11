@@ -22,7 +22,7 @@ def main(): #The main function that collects the start and end dates for the bac
 
 def player_portfolio_backtest(total_returns, start_date=None, end_date=None): #runs the backtest on the user's portfolio. This function is to be called either in main() or from the frontend via run_backtest(), thus it is a seperate function from main().
     years = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days / 365.25) #Calculate the total amount of years of the backtest (as a float) to return to the user
-    total_return, final_portfolio_value, values_list, dates_list = backtest_static(start_date, end_date, total_returns, initial_capital=1000000) #function that conducts the backtest on the user's portfolio between specified dates
+    total_return, final_portfolio_value, values_list, dates_list = backtest_static(total_returns, initial_capital=1000000) #function that conducts the backtest on the user's portfolio between specified dates
     return total_return, final_portfolio_value, years, values_list, dates_list #return the results of the backtest to the user
 
 def run_backtest(start_date, end_date): #the function that is called from the frontend to run a backtest on the user's portfolio and the P/E strategy between specified dates. This function takes the parameters start_date and end_date from the frontend, which is inputted via a visual date selector.
@@ -169,10 +169,9 @@ def backtest_strategy_value(data, specified_returns, start_date, end_date, initi
     The P/E ratio is a measure of how much investors are willing to pay for a stock's earnings. A high P/E ratio indicates that investors
     are willing to pay more for a stock, often signifying the stock is overvalued; conversly, a low P/E ratio indicates that investors are 
     willing/inclined to spend comparatively less for a stock, often signifying the stock is undervalued. Therefore, the P/E strategy works by:
-    1. calculating the P/E ratio of all stocks in the market (in this case, all the stocks avaliable to the user) for each week
-    2. Selecting the stock with the lowest P/E ratio (the most undervalued stock) and purchasing it for the week
-    3. Therefore, this purchase will experience the following week's percentage change
-    4. This will repeat, putting %100 of the strategy's capital allowance into the stock with the lowest P/E ratio for each week\
+    1. calculating the P/E ratio of all stocks (in this case, the selection of stocks avaliable to the user) for each week
+    2. Selecting the stock with the lowest P/E ratio (the most undervalued stock) and purchasing it for the week.Therefore, this purchase will experience the following week's percentage change
+    3. This will repeat, putting %100 of the strategy's capital allowance into the stock with the lowest P/E ratio for each week
     
     Therefore, the strategy operates by always looking for and investing in the most undervalued stock. Conceptually it is fine, but I've realised
     it is actually a suboptimal trading strategy, because it may not necessarily give the undervalued companies the time they require to grow or 
@@ -189,6 +188,8 @@ def backtest_strategy_value(data, specified_returns, start_date, end_date, initi
 
     #For each week in the shortened PE list, find the lowest P/E, put money into the corresponding stock, and apply the following week's percentage change.
     for ratio_index, ratio_row in shortened_pe_ratios.iterrows(): #iterate through each week of the P/E ratios
+        if ratio_index not in specified_returns.index: #skip weeks with no return data (only the very first date), so the P/E dates line up with the portfolio's dates
+            continue
         current_pe_ratio = 100 #set the P/E ratio of comparison to 100 (higher than anything we will go with)
         stock_to_buy = None #set the default stock_to_buy to nothing
         next_index = ratio_index + 1 #establish the next index, to prepare to apply the next week's percentage change
