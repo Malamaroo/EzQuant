@@ -6,6 +6,10 @@ EzQuant is a website that teaches you the basics of portfolio management (based 
 
 You have probably noticed that this architecture is quite different to what I originally planned. I quickly realised a lot of the file structure was actually quite inferior, and during development I ultimately saw the project morph to these files and this folder structure. Furthermore, the biggest architecture change is no doubt seen in the front end, but I discovered that this is required for the flask API structure that I used for frontend. So, that is that.
 
+### Another note:
+
+This is a fundamental flaw of my project, but is something that could easily be fixed, and something you may like to do too: I only chose industry leaders for each industry, so even though there should theoretically be covarianced stocks because of the unique nature of different indsutries, each stock has famously performed in the past, and thus will no doubt have amazing returns for backtesting; something that of course cannot be done in the real world. So, the obvious and easy solution to this is changing (or adding) some stocks to mid-cap or even small-cap companies, to not experience such radical and unpredictable growth.
+
 ## How to run it
 
 1. Install Python (I used 3.13), then install the packages:
