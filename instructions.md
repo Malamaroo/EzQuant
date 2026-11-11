@@ -33,3 +33,5 @@ python App/Backend/app.py
 ```
 
 4. Go to http://localhost:8000 ,follow the steps on the page, and enjoy the application!
+
+By Lucas Korab 11/11/2026
